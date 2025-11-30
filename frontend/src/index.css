@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Styles pour les formulaires */
+.MuiFormControl-root {
+  margin-bottom: 8px;
+}
+
+/* Styles pour les cartes */
+.MuiCard-root {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles pour les boutons */
+.MuiButton-root {
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 500;
+}
+
+/* Styles pour les champs de texte */
+.MuiTextField-root {
+  border-radius: 8px;
+}
+
+/* Animation de transition */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Styles pour les conteneurs */
+.container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Styles pour les alertes */
+.MuiAlert-root {
+  border-radius: 8px;
+}
+
+/* Styles pour les tableaux */
+.MuiTableCell-root {
+  border-bottom: 1px solid rgba(224, 224, 224, 1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+
+  .MuiGrid-container {
+    margin: 0;
+  }
+}
+
+/* Styles pour l'interface de consultation vidéo */
+#jitsi-meet-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Styles pour les avatars */
+.MuiAvatar-root {
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles pour les puces (chips) */
+.MuiChip-root {
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+/* Styles pour les onglets */
+.MuiTabs-root {
+  border-bottom: 1px solid rgba(224, 224, 224, 1);
+}
+
+/* Styles pour les barres de progression */
+.MuiLinearProgress-root {
+  border-radius: 8px;
+  height: 8px;
+}
