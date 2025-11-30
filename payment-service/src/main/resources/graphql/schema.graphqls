@@ -1,0 +1,59 @@
+scalar DateTime
+
+enum PaymentStatus {
+    PENDING
+    PAID
+    FAILED
+    REFUNDED
+}
+
+enum PaymentMethod {
+    CREDIT_CARD
+    DEBIT_CARD
+    PAYPAL
+    STRIPE
+}
+
+type Payment {
+    id: ID!
+    appointmentId: ID!
+    amount: Float!
+    currency: String!
+    status: PaymentStatus!
+    paymentMethod: PaymentMethod
+    stripeSessionId: String
+    stripePaymentIntentId: String
+    paidAt: DateTime
+    refundedAt: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+input CreatePaymentInput {
+    appointmentId: ID!
+    paymentMethod: PaymentMethod!
+    successUrl: String!
+    cancelUrl: String!
+}
+
+input ProcessRefundInput {
+    paymentId: ID!
+    amount: Float
+    reason: String
+}
+
+type PaymentSession {
+    sessionId: String!
+    paymentUrl: String!
+}
+
+type Query {
+    payment(id: ID!): Payment
+    appointmentPayments(appointmentId: ID!): [Payment!]!
+}
+
+type Mutation {
+    createPaymentSession(input: CreatePaymentInput!): PaymentSession!
+    confirmPayment(paymentIntentId: String!): Payment!
+    processRefund(input: ProcessRefundInput!): Payment!
+}
