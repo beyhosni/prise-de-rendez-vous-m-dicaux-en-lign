@@ -1,0 +1,69 @@
+scalar DateTime
+scalar Date
+scalar Time
+
+enum ConsultationType {
+    IN_PERSON
+    ONLINE
+    BOTH
+}
+
+type Doctor {
+    id: ID!
+    userId: ID!
+    firstName: String!
+    lastName: String!
+    specialty: String!
+    licenseNumber: String!
+    phone: String
+    officeAddress: String
+    city: String
+    postalCode: String
+    languages: [String!]!
+    consultationFee: Float!
+    bio: String
+    availabilities: [Availability!]!
+    createdAt: DateTime!
+}
+
+type Availability {
+    id: ID!
+    doctorId: ID!
+    dayOfWeek: Int!
+    startTime: Time!
+    endTime: Time!
+    slotDuration: Int!
+    consultationType: ConsultationType!
+    isActive: Boolean!
+}
+
+input UpdateDoctorProfileInput {
+    phone: String
+    officeAddress: String
+    city: String
+    postalCode: String
+    languages: [String!]
+    consultationFee: Float
+    bio: String
+}
+
+input CreateAvailabilityInput {
+    dayOfWeek: Int!
+    startTime: Time!
+    endTime: Time!
+    slotDuration: Int!
+    consultationType: ConsultationType!
+}
+
+type Query {
+    doctor(id: ID!): Doctor
+    doctorsBySpecialty(specialty: String!): [Doctor!]!
+    searchDoctors(specialty: String, city: String): [Doctor!]!
+    doctorAvailabilities(doctorId: ID!): [Availability!]!
+}
+
+type Mutation {
+    updateDoctorProfile(input: UpdateDoctorProfileInput!): Doctor!
+    createAvailability(input: CreateAvailabilityInput!): Availability!
+    deleteAvailability(id: ID!): Boolean!
+}
