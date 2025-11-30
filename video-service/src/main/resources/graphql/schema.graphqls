@@ -1,0 +1,42 @@
+scalar DateTime
+
+enum ConsultationStatus {
+    SCHEDULED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+type OnlineConsultation {
+    id: ID!
+    appointmentId: ID!
+    roomId: String!
+    roomUrl: String!
+    status: ConsultationStatus!
+    startedAt: DateTime
+    endedAt: DateTime
+    createdAt: DateTime!
+}
+
+type ConsultationToken {
+    token: String!
+    roomUrl: String!
+    expiresAt: DateTime!
+}
+
+input StartConsultationInput {
+    appointmentId: ID!
+}
+
+type Query {
+    consultation(id: ID!): OnlineConsultation
+    appointmentConsultation(appointmentId: ID!): OnlineConsultation
+    myConsultations: [OnlineConsultation!]!
+}
+
+type Mutation {
+    createConsultation(appointmentId: ID!): OnlineConsultation!
+    startConsultation(input: StartConsultationInput!): ConsultationToken!
+    joinConsultation(appointmentId: ID!): ConsultationToken!
+    endConsultation(appointmentId: ID!): OnlineConsultation!
+}

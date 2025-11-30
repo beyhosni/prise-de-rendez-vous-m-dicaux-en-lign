@@ -1,0 +1,62 @@
+scalar DateTime
+
+enum NotificationType {
+    EMAIL
+    SMS
+    PUSH
+}
+
+enum NotificationStatus {
+    PENDING
+    SENT
+    FAILED
+}
+
+enum NotificationTemplate {
+    APPOINTMENT_CONFIRMATION
+    APPOINTMENT_REMINDER
+    APPOINTMENT_CANCELLATION
+    PAYMENT_CONFIRMATION
+    PAYMENT_FAILURE
+    CONSULTATION_REMINDER
+    PASSWORD_RESET
+    ACCOUNT_VERIFICATION
+}
+
+type Notification {
+    id: ID!
+    recipient: String!
+    type: NotificationType!
+    status: NotificationStatus!
+    template: NotificationTemplate!
+    subject: String
+    content: String!
+    variables: String
+    sentAt: DateTime
+    createdAt: DateTime!
+}
+
+input SendNotificationInput {
+    recipient: String!
+    type: NotificationType!
+    template: NotificationTemplate!
+    variables: String
+}
+
+input SendBulkNotificationInput {
+    recipients: [String!]!
+    type: NotificationType!
+    template: NotificationTemplate!
+    variables: String
+}
+
+type Query {
+    notification(id: ID!): Notification
+    notificationsByRecipient(recipient: String!): [Notification!]!
+}
+
+type Mutation {
+    sendNotification(input: SendNotificationInput!): Notification!
+    sendBulkNotification(input: SendBulkNotificationInput!): [Notification!]!
+    resendNotification(id: ID!): Notification!
+}
