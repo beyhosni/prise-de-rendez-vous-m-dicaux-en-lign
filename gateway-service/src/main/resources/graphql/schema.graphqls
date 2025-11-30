@@ -1,0 +1,287 @@
+scalar DateTime
+scalar Date
+scalar Time
+
+# Types from Auth Service
+enum Role {
+    PATIENT
+    DOCTOR
+    ADMIN
+}
+
+type User {
+    id: ID!
+    email: String!
+    role: Role!
+    isActive: Boolean!
+    createdAt: DateTime!
+    patient: Patient
+    doctor: Doctor
+}
+
+type Patient {
+    id: ID!
+    userId: ID!
+    firstName: String!
+    lastName: String!
+    dateOfBirth: Date
+    phone: String
+    address: String
+    city: String
+    postalCode: String
+    insuranceNumber: String
+    createdAt: DateTime!
+}
+
+type Doctor {
+    id: ID!
+    userId: ID!
+    firstName: String!
+    lastName: String!
+    specialty: String!
+    licenseNumber: String!
+    phone: String
+    officeAddress: String
+    city: String
+    postalCode: String
+    languages: [String!]!
+    consultationFee: Float!
+    bio: String
+    createdAt: DateTime!
+}
+
+type AuthResponse {
+    accessToken: String!
+    refreshToken: String!
+    user: User!
+}
+
+# Types from Doctor Service
+enum ConsultationType {
+    IN_PERSON
+    ONLINE
+    BOTH
+}
+
+type Availability {
+    id: ID!
+    doctorId: ID!
+    dayOfWeek: Int!
+    startTime: Time!
+    endTime: Time!
+    slotDuration: Int!
+    consultationType: ConsultationType!
+    isActive: Boolean!
+}
+
+# Types from Appointment Service
+enum AppointmentStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED_BY_PATIENT
+    CANCELLED_BY_DOCTOR
+    COMPLETED
+}
+
+type Appointment {
+    id: ID!
+    patientId: ID!
+    doctorId: ID!
+    appointmentDate: Date!
+    startTime: Time!
+    endTime: Time!
+    consultationType: ConsultationType!
+    status: AppointmentStatus!
+    reason: String
+    notes: String
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type TimeSlot {
+    startTime: Time!
+    endTime: Time!
+    isAvailable: Boolean!
+}
+
+# Types from Payment Service
+enum PaymentStatus {
+    PENDING
+    PAID
+    FAILED
+    REFUNDED
+}
+
+enum PaymentMethod {
+    CREDIT_CARD
+    DEBIT_CARD
+    PAYPAL
+    STRIPE
+}
+
+type Payment {
+    id: ID!
+    appointmentId: ID!
+    amount: Float!
+    currency: String!
+    status: PaymentStatus!
+    paymentMethod: PaymentMethod
+    stripeSessionId: String
+    stripePaymentIntentId: String
+    paidAt: DateTime
+    refundedAt: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type PaymentSession {
+    sessionId: String!
+    paymentUrl: String!
+}
+
+# Types from Video Service
+enum ConsultationStatus {
+    SCHEDULED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+type OnlineConsultation {
+    id: ID!
+    appointmentId: ID!
+    roomId: String!
+    roomUrl: String!
+    status: ConsultationStatus!
+    startedAt: DateTime
+    endedAt: DateTime
+    createdAt: DateTime!
+}
+
+type ConsultationToken {
+    token: String!
+    roomUrl: String!
+    expiresAt: DateTime!
+}
+
+# Inputs
+input RegisterPatientInput {
+    email: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+    dateOfBirth: Date
+    phone: String
+    address: String
+    city: String
+    postalCode: String
+}
+
+input RegisterDoctorInput {
+    email: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+    specialty: String!
+    licenseNumber: String!
+    phone: String
+    officeAddress: String
+    city: String
+    postalCode: String
+    languages: [String!]!
+    consultationFee: Float!
+    bio: String
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input CreateAppointmentInput {
+    doctorId: ID!
+    appointmentDate: Date!
+    startTime: Time!
+    consultationType: ConsultationType!
+    reason: String
+}
+
+input CreatePaymentInput {
+    appointmentId: ID!
+    paymentMethod: PaymentMethod!
+    successUrl: String!
+    cancelUrl: String!
+}
+
+input ProcessRefundInput {
+    paymentId: ID!
+    amount: Float
+    reason: String
+}
+
+input StartConsultationInput {
+    appointmentId: ID!
+}
+
+# Queries
+type Query {
+    # Auth queries
+    me: User!
+    user(id: ID!): User
+
+    # Patient queries
+    patient(id: ID!): Patient
+
+    # Doctor queries
+    doctor(id: ID!): Doctor
+    doctorsBySpecialty(specialty: String!): [Doctor!]!
+    searchDoctors(specialty: String, city: String): [Doctor!]!
+    doctorAvailabilities(doctorId: ID!): [Availability!]!
+
+    # Appointment queries
+    appointment(id: ID!): Appointment
+    patientAppointments(patientId: ID!): [Appointment!]!
+    doctorAppointments(doctorId: ID!): [Appointment!]!
+    availableSlots(doctorId: ID!, date: Date!): [TimeSlot!]!
+
+    # Payment queries
+    payment(id: ID!): Payment
+    appointmentPayments(appointmentId: ID!): [Payment!]!
+
+    # Video queries
+    consultation(id: ID!): OnlineConsultation
+    appointmentConsultation(appointmentId: ID!): OnlineConsultation
+    myConsultations: [OnlineConsultation!]!
+}
+
+# Mutations
+type Mutation {
+    # Auth mutations
+    registerPatient(input: RegisterPatientInput!): AuthResponse!
+    registerDoctor(input: RegisterDoctorInput!): AuthResponse!
+    login(input: LoginInput!): AuthResponse!
+    refreshToken(refreshToken: String!): AuthResponse!
+    logout: Boolean!
+
+    # Doctor mutations
+    updateDoctorProfile(input: UpdateDoctorProfileInput!): Doctor!
+    createAvailability(input: CreateAvailabilityInput!): Availability!
+    deleteAvailability(id: ID!): Boolean!
+
+    # Appointment mutations
+    createAppointment(input: CreateAppointmentInput!): Appointment!
+    cancelAppointment(appointmentId: ID!, reason: String): Appointment!
+    confirmAppointment(appointmentId: ID!): Appointment!
+    completeAppointment(appointmentId: ID!, notes: String): Appointment!
+
+    # Payment mutations
+    createPaymentSession(input: CreatePaymentInput!): PaymentSession!
+    confirmPayment(paymentIntentId: String!): Payment!
+    processRefund(input: ProcessRefundInput!): Payment!
+
+    # Video mutations
+    createConsultation(appointmentId: ID!): OnlineConsultation!
+    startConsultation(input: StartConsultationInput!): ConsultationToken!
+    joinConsultation(appointmentId: ID!): ConsultationToken!
+    endConsultation(appointmentId: ID!): OnlineConsultation!
+}
