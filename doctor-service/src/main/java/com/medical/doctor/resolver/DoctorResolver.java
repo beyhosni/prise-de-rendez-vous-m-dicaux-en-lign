@@ -7,51 +7,59 @@ import com.medical.doctor.dto.DoctorDTO;
 import com.medical.doctor.dto.UpdateDoctorProfileInput;
 import com.medical.doctor.service.AvailabilityService;
 import com.medical.doctor.service.DoctorService;
-import graphql.kickstart.tools.GraphQLMutationResolver;
-import graphql.kickstart.tools.GraphQLQueryResolver;
 import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
-@Component
+@Controller
 @RequiredArgsConstructor
-public class DoctorResolver implements GraphQLQueryResolver, GraphQLMutationResolver {
+public class DoctorResolver {
 
     private final DoctorService doctorService;
     private final AvailabilityService availabilityService;
 
     // Queries
-    public DoctorDTO doctor(Long id) {
+    @QueryMapping
+    public DoctorDTO doctor(@Argument Long id) {
         return doctorService.getDoctorById(id);
     }
 
-    public List<DoctorDTO> doctorsBySpecialty(String specialty) {
+    @QueryMapping
+    public List<DoctorDTO> doctorsBySpecialty(@Argument String specialty) {
         return doctorService.getDoctorsBySpecialty(specialty);
     }
 
-    public List<DoctorDTO> searchDoctors(String specialty, String city) {
+    @QueryMapping
+    public List<DoctorDTO> searchDoctors(@Argument String specialty, @Argument String city) {
         return doctorService.searchDoctors(specialty, city);
     }
 
-    public List<AvailabilityDTO> doctorAvailabilities(Long doctorId) {
+    @QueryMapping
+    public List<AvailabilityDTO> doctorAvailabilities(@Argument Long doctorId) {
         return availabilityService.getAvailabilities(doctorId);
     }
 
     // Mutations
-    public DoctorDTO updateDoctorProfile(UpdateDoctorProfileInput input) {
+    @MutationMapping
+    public DoctorDTO updateDoctorProfile(@Argument UpdateDoctorProfileInput input) {
         Long userId = getAuthenticatedUserId();
         return doctorService.updateProfile(userId, input);
     }
 
-    public AvailabilityDTO createAvailability(CreateAvailabilityInput input) {
+    @MutationMapping
+    public AvailabilityDTO createAvailability(@Argument CreateAvailabilityInput input) {
         Long userId = getAuthenticatedUserId();
         return availabilityService.createAvailability(userId, input);
     }
 
-    public Boolean deleteAvailability(Long id) {
+    @MutationMapping
+    public Boolean deleteAvailability(@Argument Long id) {
         Long userId = getAuthenticatedUserId();
         return availabilityService.deleteAvailability(userId, id);
     }

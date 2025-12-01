@@ -7,18 +7,19 @@ import com.medical.auth.repository.PatientRepository;
 import com.medical.auth.repository.UserRepository;
 import com.medical.auth.service.AuthService;
 import com.medical.common.exception.NotFoundException;
-import graphql.kickstart.tools.GraphQLMutationResolver;
-import graphql.kickstart.tools.GraphQLQueryResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
-@Component
+@Controller
 @RequiredArgsConstructor
 @Slf4j
-public class AuthResolver implements GraphQLQueryResolver, GraphQLMutationResolver {
+public class AuthResolver {
 
     private final AuthService authService;
     private final UserRepository userRepository;
@@ -26,6 +27,7 @@ public class AuthResolver implements GraphQLQueryResolver, GraphQLMutationResolv
     private final DoctorRepository doctorRepository;
 
     // Queries
+    @QueryMapping
     public UserDTO me() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -50,7 +52,8 @@ public class AuthResolver implements GraphQLQueryResolver, GraphQLMutationResolv
         return userDTO;
     }
 
-    public UserDTO user(Long id) {
+    @QueryMapping
+    public UserDTO user(@Argument Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         
@@ -72,22 +75,27 @@ public class AuthResolver implements GraphQLQueryResolver, GraphQLMutationResolv
     }
 
     // Mutations
-    public AuthResponse registerPatient(RegisterPatientInput input) {
+    @MutationMapping
+    public AuthResponse registerPatient(@Argument RegisterPatientInput input) {
         return authService.registerPatient(input);
     }
 
-    public AuthResponse registerDoctor(RegisterDoctorInput input) {
+    @MutationMapping
+    public AuthResponse registerDoctor(@Argument RegisterDoctorInput input) {
         return authService.registerDoctor(input);
     }
 
-    public AuthResponse login(LoginInput input) {
+    @MutationMapping
+    public AuthResponse login(@Argument LoginInput input) {
         return authService.login(input);
     }
 
-    public AuthResponse refreshToken(String refreshToken) {
+    @MutationMapping
+    public AuthResponse refreshToken(@Argument String refreshToken) {
         return authService.refreshToken(refreshToken);
     }
 
+    @MutationMapping
     public Boolean logout() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();

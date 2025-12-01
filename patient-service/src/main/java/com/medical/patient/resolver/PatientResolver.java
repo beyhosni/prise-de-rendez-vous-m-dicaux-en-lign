@@ -4,26 +4,29 @@ import com.medical.common.exception.UnauthorizedException;
 import com.medical.patient.dto.PatientDTO;
 import com.medical.patient.dto.UpdatePatientProfileInput;
 import com.medical.patient.service.PatientService;
-import graphql.kickstart.tools.GraphQLMutationResolver;
-import graphql.kickstart.tools.GraphQLQueryResolver;
 import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
-@Component
+@Controller
 @RequiredArgsConstructor
-public class PatientResolver implements GraphQLQueryResolver, GraphQLMutationResolver {
+public class PatientResolver {
 
     private final PatientService patientService;
 
     // Queries
-    public PatientDTO patient(Long id) {
+    @QueryMapping
+    public PatientDTO patient(@Argument Long id) {
         return patientService.getPatientById(id);
     }
 
     // Mutations
-    public PatientDTO updatePatientProfile(UpdatePatientProfileInput input) {
+    @MutationMapping
+    public PatientDTO updatePatientProfile(@Argument UpdatePatientProfileInput input) {
         Long userId = getAuthenticatedUserId();
         return patientService.updateProfile(userId, input);
     }

@@ -6,58 +6,67 @@ import com.medical.appointment.dto.TimeSlot;
 import com.medical.appointment.service.AppointmentService;
 import com.medical.appointment.service.SlotService;
 import com.medical.common.exception.UnauthorizedException;
-import graphql.kickstart.tools.GraphQLMutationResolver;
-import graphql.kickstart.tools.GraphQLQueryResolver;
 import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Component
+@Controller
 @RequiredArgsConstructor
-public class AppointmentResolver implements GraphQLQueryResolver, GraphQLMutationResolver {
+public class AppointmentResolver {
 
     private final AppointmentService appointmentService;
     private final SlotService slotService;
 
     // Queries
-    public AppointmentDTO appointment(Long id) {
+    @QueryMapping
+    public AppointmentDTO appointment(@Argument Long id) {
         return appointmentService.getAppointmentById(id);
     }
 
-    public List<AppointmentDTO> patientAppointments(Long patientId) {
+    @QueryMapping
+    public List<AppointmentDTO> patientAppointments(@Argument Long patientId) {
         // TODO: Verify authorization (patient can see own, doctor can see own, admin can see all)
         return appointmentService.getAppointmentsByPatient(patientId);
     }
 
-    public List<AppointmentDTO> doctorAppointments(Long doctorId) {
+    @QueryMapping
+    public List<AppointmentDTO> doctorAppointments(@Argument Long doctorId) {
         return appointmentService.getAppointmentsByDoctor(doctorId);
     }
 
-    public List<TimeSlot> availableSlots(Long doctorId, LocalDate date) {
+    @QueryMapping
+    public List<TimeSlot> availableSlots(@Argument Long doctorId, @Argument LocalDate date) {
         return slotService.getAvailableSlots(doctorId, date);
     }
 
     // Mutations
-    public AppointmentDTO createAppointment(CreateAppointmentInput input) {
+    @MutationMapping
+    public AppointmentDTO createAppointment(@Argument CreateAppointmentInput input) {
         Long userId = getAuthenticatedUserId();
         return appointmentService.createAppointment(userId, input);
     }
 
-    public AppointmentDTO cancelAppointment(Long appointmentId, String reason) {
+    @MutationMapping
+    public AppointmentDTO cancelAppointment(@Argument Long appointmentId, @Argument String reason) {
         Long userId = getAuthenticatedUserId();
         return appointmentService.cancelAppointment(userId, appointmentId, reason);
     }
 
-    public AppointmentDTO confirmAppointment(Long appointmentId) {
+    @MutationMapping
+    public AppointmentDTO confirmAppointment(@Argument Long appointmentId) {
         // TODO: Verify doctor authorization
         return appointmentService.confirmAppointment(appointmentId);
     }
 
-    public AppointmentDTO completeAppointment(Long appointmentId, String notes) {
+    @MutationMapping
+    public AppointmentDTO completeAppointment(@Argument Long appointmentId, @Argument String notes) {
         // TODO: Verify doctor authorization
         return appointmentService.completeAppointment(appointmentId, notes);
     }
