@@ -1,0 +1,35 @@
+scalar DateTime
+scalar Date
+
+type Patient {
+    id: ID!
+    userId: ID!
+    firstName: String!
+    lastName: String!
+    dateOfBirth: Date
+    phone: String
+    address: String
+    city: String
+    postalCode: String
+    insuranceNumber: String
+    createdAt: DateTime!
+}
+
+input UpdatePatientProfileInput {
+    firstName: String
+    lastName: String
+    dateOfBirth: Date
+    phone: String
+    address: String
+    city: String
+    postalCode: String
+    insuranceNumber: String
+}
+
+type Query {
+    patient(id: ID!): Patient
+}
+
+type Mutation {
+    updatePatientProfile(input: UpdatePatientProfileInput!): Patient!
+}
