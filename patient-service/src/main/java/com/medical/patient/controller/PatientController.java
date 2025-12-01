@@ -1,34 +1,34 @@
-package com.medical.patient.resolver;
+package com.medical.patient.controller;
 
 import com.medical.common.exception.UnauthorizedException;
 import com.medical.patient.dto.PatientDTO;
 import com.medical.patient.dto.UpdatePatientProfileInput;
 import com.medical.patient.service.PatientService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/patients")
 @RequiredArgsConstructor
-public class PatientResolver {
+@CrossOrigin(origins = "*")
+public class PatientController {
 
     private final PatientService patientService;
 
-    // Queries
-    @QueryMapping
-    public PatientDTO patient(@Argument Long id) {
-        return patientService.getPatientById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<PatientDTO> getPatient(@PathVariable Long id) {
+        return ResponseEntity.ok(patientService.getPatientById(id));
     }
 
-    // Mutations
-    @MutationMapping
-    public PatientDTO updatePatientProfile(@Argument UpdatePatientProfileInput input) {
+    @PutMapping("/profile")
+    public ResponseEntity<PatientDTO> updateProfile(@Valid @RequestBody UpdatePatientProfileInput input) {
         Long userId = getAuthenticatedUserId();
-        return patientService.updateProfile(userId, input);
+        return ResponseEntity.ok(patientService.updateProfile(userId, input));
     }
 
     private Long getAuthenticatedUserId() {
@@ -42,5 +42,4 @@ public class PatientResolver {
             throw new UnauthorizedException("Invalid user principal");
         }
     }
-
 }

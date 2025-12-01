@@ -1,4 +1,4 @@
-package com.medical.auth.resolver;
+package com.medical.auth.controller;
 
 import com.medical.auth.dto.*;
 import com.medical.auth.model.User;
@@ -9,26 +9,59 @@ import com.medical.auth.service.AuthService;
 import com.medical.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
-public class AuthResolver {
+@CrossOrigin(origins = "*")
+public class AuthController {
 
     private final AuthService authService;
     private final UserRepository userRepository;
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
 
-    // Queries
-    @QueryMapping
-    public UserDTO me() {
+    @PostMapping("/register/patient")
+    public ResponseEntity<AuthResponse> registerPatient(@Valid @RequestBody RegisterPatientInput input) {
+        return ResponseEntity.ok(authService.registerPatient(input));
+    }
+
+    @PostMapping("/register/doctor")
+    public ResponseEntity<AuthResponse> registerDoctor(@Valid @RequestBody RegisterDoctorInput input) {
+        return ResponseEntity.ok(authService.registerDoctor(input));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginInput input) {
+        return ResponseEntity.ok(authService.login(input));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshToken(@RequestBody String refreshToken) {
+        return ResponseEntity.ok(authService.refreshToken(refreshToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Boolean> logout() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        
+        authService.logout(user.getId());
+        return ResponseEntity.ok(true);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> me() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         
@@ -49,11 +82,11 @@ public class AuthResolver {
                 break;
         }
         
-        return userDTO;
+        return ResponseEntity.ok(userDTO);
     }
 
-    @QueryMapping
-    public UserDTO user(@Argument Long id) {
+    @GetMapping("/user/{id}")
+    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         
@@ -71,40 +104,6 @@ public class AuthResolver {
                 break;
         }
         
-        return userDTO;
+        return ResponseEntity.ok(userDTO);
     }
-
-    // Mutations
-    @MutationMapping
-    public AuthResponse registerPatient(@Argument RegisterPatientInput input) {
-        return authService.registerPatient(input);
-    }
-
-    @MutationMapping
-    public AuthResponse registerDoctor(@Argument RegisterDoctorInput input) {
-        return authService.registerDoctor(input);
-    }
-
-    @MutationMapping
-    public AuthResponse login(@Argument LoginInput input) {
-        return authService.login(input);
-    }
-
-    @MutationMapping
-    public AuthResponse refreshToken(@Argument String refreshToken) {
-        return authService.refreshToken(refreshToken);
-    }
-
-    @MutationMapping
-    public Boolean logout() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        
-        authService.logout(user.getId());
-        return true;
-    }
-
 }
